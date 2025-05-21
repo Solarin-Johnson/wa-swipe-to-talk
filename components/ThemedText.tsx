@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   defaultSemiBold: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: "InterSemiBold",
   },
   title: {

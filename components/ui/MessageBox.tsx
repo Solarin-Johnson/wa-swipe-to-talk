@@ -11,20 +11,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useThemeColor } from "@/hooks/useThemeColor";
 
 export default function MessageBox() {
-  const { bottom } = useSafeAreaInsets();
   const text = useThemeColor({}, "text");
   const barColor = useThemeColor({}, "barColor");
-  const bg = useThemeColor({}, "background");
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          paddingBottom: bottom + 6,
-        },
-      ]}
-    >
+    <View style={styles.container}>
       <View style={[styles.inputBox, { backgroundColor: barColor }]}>
         <Ionicons
           name="happy-outline"
@@ -55,7 +46,7 @@ export default function MessageBox() {
         </TouchableOpacity>
       </View>
       <Pressable style={styles.micButton}>
-        <MaterialIcons name="keyboard-voice" size={25} color={bg} />
+        <MaterialIcons name="keyboard-voice" size={25} color={barColor} />
       </Pressable>
     </View>
   );
@@ -65,7 +56,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "flex-end",
-    padding: 12,
+    padding: 8,
   },
   inputBox: {
     flex: 1,
@@ -95,6 +86,6 @@ const styles = StyleSheet.create({
     height: 48,
     alignItems: "center",
     justifyContent: "center",
-    elevation: 2,
+    boxShadow: "0 3px 3px #00000025",
   },
 });

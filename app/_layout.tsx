@@ -18,7 +18,10 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({});
+  const [loaded] = useFonts({
+    InterMedium: require("../assets/fonts/Inter-Medium.ttf"),
+    InterSemiBold: require("../assets/fonts/Inter-SemiBold.ttf"),
+  });
 
   useEffect(() => {
     const configureSplashScreen = async () => {
