@@ -13,7 +13,7 @@ export const Colors = {
     background: "#E9E7E7",
     barColor: "#ffffff",
     textFade: "#C1C0C1",
-    error: "#9E313C",
+    error: "#A53640",
     ...globalColor,
   },
   dark: {
@@ -21,7 +21,7 @@ export const Colors = {
     background: "#121212",
     barColor: "#222222",
     textFade: "#383838",
-    error: "#FF7373",
+    error: "#FE7272",
     ...globalColor,
   },
 };

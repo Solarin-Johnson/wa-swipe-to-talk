@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import {
   Gesture,
   GestureDetector,
@@ -12,7 +12,6 @@ import Animated, {
   useDerivedValue,
   WithSpringConfig,
   withTiming,
-  Easing,
 } from "react-native-reanimated";
 import MessageBox from "./ui/MessageBox";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -20,6 +19,7 @@ import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { RadialProgress } from "./ui/RadialProgress";
 import { ThemedText } from "./ThemedText";
+import { Image } from "expo-image";
 
 const MAX_DRAW_OFFSET = 150;
 const SPRING_CONFIG: WithSpringConfig = {
@@ -39,9 +39,7 @@ const CIRCULAR_WIDTH = 40;
 const CONNECT_WIDTH = 150;
 const CONNECT_LARGE_WIDTH = 280;
 const CONNECT_HEIGHT = 54;
-const CONNECT_LARGE_HEIGHT = 92;
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const CONNECT_LARGE_HEIGHT = 90;
 
 export default function Swipable() {
   const translateY = useSharedValue(0);
@@ -49,14 +47,14 @@ export default function Swipable() {
   const text = useThemeColor({}, "text");
   const textFade = useThemeColor({}, "textFade");
   const error = useThemeColor({}, "error");
-  const { bottom } = useSafeAreaInsets();
+  const { bottom, top } = useSafeAreaInsets();
 
   const iconProps = { color: text };
   const callBtnProps = {
     size: 27,
     ...iconProps,
     style: {
-      backgroundColor: text + "20",
+      backgroundColor: text + "16",
       borderRadius: 50,
       padding: 10,
     },
@@ -158,11 +156,14 @@ export default function Swipable() {
     transform: [
       {
         translateY: withSpring(
-          connected.value ? -CONNECT_HEIGHT / 2 : 0,
-          SPRING_CONFIG
+          connected.value ? -CONNECT_HEIGHT / 4 : 0,
+          SPRING_CONFIG_SNAP
         ),
       },
     ],
+  }));
+  const callConnectStyle = useAnimatedStyle(() => ({
+    opacity: withSpring(connected.value ? 1 : 0, SPRING_CONFIG_SNAP),
   }));
 
   const onCLose = () => {
@@ -175,9 +176,15 @@ export default function Swipable() {
     <View style={{ flex: 1 }}>
       <GestureDetector gesture={panGesture}>
         <View style={{ flex: 1 }}>
-          <Animated.ScrollView style={[styles.swipable, slideAnimatedStyle]}>
-            <Text>Swipable</Text>
-          </Animated.ScrollView>
+          <Animated.View
+            style={[
+              styles.swipable,
+              { marginTop: top + 12 },
+              slideAnimatedStyle,
+            ]}
+          >
+            <ThemedText>Swipable</ThemedText>
+          </Animated.View>
           <Animated.View
             style={[
               {
@@ -227,9 +234,20 @@ export default function Swipable() {
                 />
                 <ThemedText type="defaultSemiBold">Connect</ThemedText>
               </Animated.View>
-              <Animated.View style={styles.connectCall}>
+              <Animated.View style={[styles.connectCall, callConnectStyle]}>
                 <Ionicons name="mic-off" {...callBtnProps} />
-                <View style={{ flex: 1 }}></View>
+                <View style={{ flex: 1, alignItems: "center", rowGap: 6 }}>
+                  <Image
+                    source={require("@/assets/images/dp.png")}
+                    style={{ width: 48, aspectRatio: 1, borderRadius: 50 }}
+                  />
+                  <ThemedText
+                    type="defaultSemiBold"
+                    style={{ fontSize: 13, opacity: 0.5 }}
+                  >
+                    Connecting...
+                  </ThemedText>
+                </View>
                 <Pressable onPress={onCLose}>
                   <Ionicons name="close" {...callBtnProps} color={error} />
                 </Pressable>
@@ -247,10 +265,13 @@ export default function Swipable() {
 
 const styles = StyleSheet.create({
   swipable: {
-    backgroundColor: "#ffffff10",
+    backgroundColor: "#80808020",
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 12,
     flex: 1,
+    margin: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
   progressIndicator: {
     alignSelf: "center",
@@ -285,5 +306,4 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
   },
-  callBtn: {},
 });
