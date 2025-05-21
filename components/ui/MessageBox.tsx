@@ -74,9 +74,11 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
+    minWidth: 100,
     fontSize: 16,
     paddingVertical: 8,
     paddingHorizontal: 8,
+    outlineWidth: 0,
   },
   micButton: {
     backgroundColor: "#25D366",

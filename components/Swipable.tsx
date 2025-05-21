@@ -185,13 +185,20 @@ export default function Swipable() {
   }));
 
   const helperAnimatedStyle1 = useAnimatedStyle(() => {
-    const show = progress.value > 0.2 && !countCompleted.value;
+    const show = progress.value > 0.2 && !maxxed.value && !countCompleted.value;
     return {
       opacity: withSpring(show ? 1 : 0, SPRING_CONFIG),
     };
   });
 
   const helperAnimatedStyle2 = useAnimatedStyle(() => {
+    const show = maxxed.value && !countCompleted.value;
+    return {
+      opacity: withSpring(show ? 1 : 0, SPRING_CONFIG),
+    };
+  });
+
+  const helperAnimatedStyle3 = useAnimatedStyle(() => {
     const show = countCompleted.value;
     return {
       opacity: withSpring(show ? 1 : 0, SPRING_CONFIG),
@@ -301,6 +308,11 @@ export default function Swipable() {
             </ThemedText>
           </Animated.View>
           <Animated.View style={[styles.icon, helperAnimatedStyle2]}>
+            <ThemedText type="defaultSemiBold" style={styles.helperText}>
+              Keep holding to talk
+            </ThemedText>
+          </Animated.View>
+          <Animated.View style={[styles.icon, helperAnimatedStyle3]}>
             <ThemedText type="defaultSemiBold" style={styles.helperText}>
               Release to talk
             </ThemedText>
