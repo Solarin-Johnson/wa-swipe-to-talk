@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "expo-boilerplate",
-    "slug": "expo-boilerplate",
+    "name": "wa-swipe-to-talk",
+    "slug": "wa-swipe-to-talk",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

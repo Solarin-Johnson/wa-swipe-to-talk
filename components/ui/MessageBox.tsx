@@ -7,7 +7,6 @@ import {
 } from "react-native";
 import React from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useThemeColor } from "@/hooks/useThemeColor";
 
 export default function MessageBox() {

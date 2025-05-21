@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useEffect } from "react";
+import { Platform, StyleSheet, View } from "react-native";
 import {
   Gesture,
   GestureDetector,
@@ -12,6 +12,9 @@ import Animated, {
   useDerivedValue,
   WithSpringConfig,
   withTiming,
+  withRepeat,
+  withSequence,
+  runOnUI,
 } from "react-native-reanimated";
 import MessageBox from "./ui/MessageBox";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -20,6 +23,7 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { RadialProgress } from "./ui/RadialProgress";
 import { ThemedText } from "./ThemedText";
 import { Image } from "expo-image";
+import { ArrowUp } from "./ui/Arrow";
 
 const MAX_DRAW_OFFSET = 150;
 const SPRING_CONFIG: WithSpringConfig = {
@@ -39,7 +43,7 @@ const CIRCULAR_WIDTH = 40;
 const CONNECT_WIDTH = 150;
 const CONNECT_LARGE_WIDTH = 280;
 const CONNECT_HEIGHT = 54;
-const CONNECT_LARGE_HEIGHT = 90;
+const CONNECT_LARGE_HEIGHT = 92;
 
 export default function Swipable() {
   const translateY = useSharedValue(0);
@@ -48,16 +52,12 @@ export default function Swipable() {
   const textFade = useThemeColor({}, "textFade");
   const error = useThemeColor({}, "error");
   const { bottom, top } = useSafeAreaInsets();
+  const floatOffset = useSharedValue(0);
 
   const iconProps = { color: text };
   const callBtnProps = {
     size: 27,
     ...iconProps,
-    style: {
-      backgroundColor: text + "16",
-      borderRadius: 50,
-      padding: 10,
-    },
   };
 
   const progress = useDerivedValue(() => {
@@ -71,6 +71,19 @@ export default function Swipable() {
   const radialProgress = useDerivedValue<number>(() => {
     return maxxed.value ? withTiming(1, { duration: 1000 }) : 0;
   });
+
+  useEffect(() => {
+    runOnUI(() => {
+      floatOffset.value = withRepeat(
+        withSequence(
+          withTiming(-15, { duration: 1800 }),
+          withTiming(0, { duration: 1800 })
+        ),
+        -1,
+        true
+      );
+    })();
+  }, []);
 
   const countCompleted = useDerivedValue<boolean>(() => {
     return radialProgress.value === 1;
@@ -162,9 +175,28 @@ export default function Swipable() {
       },
     ],
   }));
+
   const callConnectStyle = useAnimatedStyle(() => ({
     opacity: withSpring(connected.value ? 1 : 0, SPRING_CONFIG_SNAP),
   }));
+
+  const floatAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: floatOffset.value }],
+  }));
+
+  const helperAnimatedStyle1 = useAnimatedStyle(() => {
+    const show = progress.value > 0.2 && !countCompleted.value;
+    return {
+      opacity: withSpring(show ? 1 : 0, SPRING_CONFIG),
+    };
+  });
+
+  const helperAnimatedStyle2 = useAnimatedStyle(() => {
+    const show = countCompleted.value;
+    return {
+      opacity: withSpring(show ? 1 : 0, SPRING_CONFIG),
+    };
+  });
 
   const onCLose = () => {
     translateY.value = withSpring(0, SPRING_CONFIG, () => {
@@ -183,7 +215,10 @@ export default function Swipable() {
               slideAnimatedStyle,
             ]}
           >
-            <ThemedText>Swipable</ThemedText>
+            <ThemedText type="defaultSemiBold" style={{ fontSize: 16 }}>
+              Drag Up!
+            </ThemedText>
+            <ArrowUp />
           </Animated.View>
           <Animated.View
             style={[
@@ -235,11 +270,13 @@ export default function Swipable() {
                 <ThemedText type="defaultSemiBold">Connect</ThemedText>
               </Animated.View>
               <Animated.View style={[styles.connectCall, callConnectStyle]}>
-                <Ionicons name="mic-off" {...callBtnProps} />
-                <View style={{ flex: 1, alignItems: "center", rowGap: 6 }}>
+                <ActionButton>
+                  <Ionicons name="mic-off" {...callBtnProps} />
+                </ActionButton>
+                <View style={{ flex: 1, alignItems: "center", rowGap: 8 }}>
                   <Image
                     source={require("@/assets/images/dp.png")}
-                    style={{ width: 48, aspectRatio: 1, borderRadius: 50 }}
+                    style={{ width: 50, aspectRatio: 1, borderRadius: 50 }}
                   />
                   <ThemedText
                     type="defaultSemiBold"
@@ -248,18 +285,55 @@ export default function Swipable() {
                     Connecting...
                   </ThemedText>
                 </View>
-                <Pressable onPress={onCLose}>
+                <ActionButton onPress={onCLose}>
                   <Ionicons name="close" {...callBtnProps} color={error} />
-                </Pressable>
+                </ActionButton>
               </Animated.View>
             </Animated.View>
           </Animated.View>
         </View>
       </GestureDetector>
-      <Animated.View style={[msgBoxAnimatedStyle, { paddingBottom: bottom }]}>
-        <MessageBox />
-      </Animated.View>
+      <View>
+        <Animated.View style={[styles.helperContainer, floatAnimatedStyle]}>
+          <Animated.View style={[styles.icon, helperAnimatedStyle1]}>
+            <ThemedText type="defaultSemiBold" style={styles.helperText}>
+              Swipe up to talk
+            </ThemedText>
+          </Animated.View>
+          <Animated.View style={[styles.icon, helperAnimatedStyle2]}>
+            <ThemedText type="defaultSemiBold" style={styles.helperText}>
+              Release to talk
+            </ThemedText>
+          </Animated.View>
+        </Animated.View>
+        <Animated.View style={[msgBoxAnimatedStyle, { paddingBottom: bottom }]}>
+          <MessageBox />
+        </Animated.View>
+      </View>
     </View>
+  );
+}
+
+type ButtonProps = React.PropsWithChildren<{
+  onPress?: () => void;
+}>;
+
+function ActionButton({ onPress, children }: ButtonProps) {
+  const text = useThemeColor({}, "text");
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{
+        backgroundColor: text + "16",
+        borderRadius: 50,
+        width: 50,
+        aspectRatio: 1,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {children}
+    </Pressable>
   );
 }
 
@@ -267,11 +341,12 @@ const styles = StyleSheet.create({
   swipable: {
     backgroundColor: "#80808020",
     padding: 20,
+    paddingVertical: 42,
     borderRadius: 12,
     flex: 1,
     margin: 12,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-end",
   },
   progressIndicator: {
     alignSelf: "center",
@@ -305,5 +380,13 @@ const styles = StyleSheet.create({
     padding: 8,
     flexDirection: "row",
     alignItems: "flex-start",
+  },
+  helperContainer: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  helperText: {
+    fontSize: 15,
   },
 });
